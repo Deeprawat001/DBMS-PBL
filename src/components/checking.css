@@ -1,0 +1,11 @@
+.checking{
+    background-color:'linear-gradient(135deg, #e3f2fd, #bbdefb)';
+    overflow: scroll;
+    height: 400px;
+
+}
+
+
+.check2{
+    background-color: rgb(255, 255, 255);
+}
