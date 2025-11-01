@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SimpleMap from "./SimpleMap";
 import "./App.css";
-
-// 1. IMPORT THE ROUTE DATA: You must import the routes array from your data source.
-//    (Assuming your route data file is named 'routes.js' or similar in a 'data' folder)
 import { routes as maritimeRoutes } from './data/routes'; 
- 
-// Note: WaypointWeatherForecast has been renamed to WaypointWeatherDisplay
-// in the final version of the component logic we developed. 
-// I'll assume you renamed the file/component in your project.
 import WaypointWeatherDisplay from "./components/WaypointWeatherForecast"; 
 
 

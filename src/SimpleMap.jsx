@@ -16,33 +16,33 @@ import RouteCostAnalysis from './components/RouteCostAnalysis';
 const calculateFuelConsumption = (weatherSpeed, currentWaypointIndex, totalWaypoints, weatherData = null) => {
   const baseFuelConsumption = 1260; // kg/h at base speed (20 knots)
   const remainingWaypoints = totalWaypoints - currentWaypointIndex;
-  
+
   // Fuel consumption increases with resistance and decreases with speed
   // Higher resistance = more power needed = more fuel
   const speedFactor = Math.max(0.5, weatherSpeed / 20); // Speed ratio (assuming 20 knots base)
   const resistanceFactor = 1 + (Math.abs(weatherSpeed - 20) / 20) * 0.5; // Resistance impact
-  
+
   // Additional weather-based fuel adjustments
   let weatherFuelMultiplier = 1.0;
   if (weatherData && weatherData.weather && weatherData.ocean) {
     const windSpeed = weatherData.weather.wind?.speed || 0;
     const waveHeight = weatherData.ocean.waveHeight || 0;
-    
+
     // High winds increase fuel consumption
     if (windSpeed > 15) weatherFuelMultiplier *= 1.2;
     else if (windSpeed > 10) weatherFuelMultiplier *= 1.1;
-    
+
     // High waves increase fuel consumption
     if (waveHeight > 3) weatherFuelMultiplier *= 1.25;
     else if (waveHeight > 2) weatherFuelMultiplier *= 1.15;
   }
-  
+
   // Calculate fuel consumption for current waypoint
   const currentFuelConsumption = baseFuelConsumption * resistanceFactor * weatherFuelMultiplier / speedFactor;
-  
+
   // Estimate remaining fuel for the route (more accurate calculation)
   const estimatedRemainingFuel = currentFuelConsumption * remainingWaypoints * 2; // 2 hours per waypoint
-  
+
   return {
     current: currentFuelConsumption,
     remaining: estimatedRemainingFuel,
@@ -58,38 +58,38 @@ const calculateRouteCost = (fuelConsumption, currentWaypointIndex, totalWaypoint
   const operationalCost = 5000; // USD per hour (crew, maintenance, etc.)
   const portFees = 15000; // USD per port call
   const canalFees = routeStyle === 'dashed' ? 500000 : 0; // Suez Canal fees
-  
+
   const remainingWaypoints = totalWaypoints - currentWaypointIndex;
   const remainingHours = remainingWaypoints * 2; // 2 hours per waypoint
-  
+
   // Fuel cost
   const fuelCost = fuelConsumption.total * fuelPrice;
-  
+
   // Operational cost
   const operationalCostTotal = operationalCost * remainingHours;
-  
+
   // Port fees (only for major ports)
   const majorPortsRemaining = Math.max(0, Math.floor(remainingWaypoints / 10)); // Estimate major ports
   const portFeesTotal = majorPortsRemaining * portFees;
-  
+
   // Canal fees (if applicable and not yet passed)
   const canalFeesTotal = canalFees;
-  
+
   // Weather-related additional costs
   let weatherCostMultiplier = 1.0;
   if (weatherData && weatherData.weather && weatherData.ocean) {
     const windSpeed = weatherData.weather.wind?.speed || 0;
     const waveHeight = weatherData.ocean.waveHeight || 0;
-    
+
     if (windSpeed > 15 || waveHeight > 3) {
       weatherCostMultiplier = 1.1; // 10% additional cost for severe conditions
     }
   }
-  
+
   // Total route cost from current waypoint to destination
   const baseCost = fuelCost + operationalCostTotal + portFeesTotal + canalFeesTotal;
   const totalRouteCost = baseCost * weatherCostMultiplier;
-  
+
   return {
     fuelCost: fuelCost,
     operationalCost: operationalCostTotal,
@@ -143,7 +143,7 @@ export default function SimpleMap() {
   const [error, setError] = useState(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const mapRef = useRef(null);
-  
+
   const [visibleRoutes, setVisibleRoutes] = useState({
     1: true,
     2: true
@@ -152,7 +152,7 @@ export default function SimpleMap() {
   const [waypointData, setWaypointData] = useState({});
   const [loadingWaypoints, setLoadingWaypoints] = useState({});
   const [selectedRouteForCalculation, setSelectedRouteForCalculation] = useState(null);
-  
+
   // Ship movement simulation states
   const [selectedRouteForSimulation, setSelectedRouteForSimulation] = useState(null);
   const [selectedRouteForAnalysis, setSelectedRouteForAnalysis] = useState(null);
@@ -176,9 +176,9 @@ export default function SimpleMap() {
 
   if (error) {
     return (
-      <div style={{ 
-        padding: '20px', 
-        textAlign: 'center', 
+      <div style={{
+        padding: '20px',
+        textAlign: 'center',
         color: 'red',
         background: '#fff',
         borderRadius: '12px',
@@ -194,8 +194,8 @@ export default function SimpleMap() {
 
   if (!isMapReady) {
     return (
-      <div style={{ 
-        padding: '20px', 
+      <div style={{
+        padding: '20px',
         textAlign: 'center',
         background: '#fff',
         borderRadius: '12px',
@@ -217,7 +217,7 @@ export default function SimpleMap() {
     if (mapRef.current && route) {
       const map = mapRef.current;
       const bounds = L.latLngBounds(route.coordinates);
-      map.fitBounds(bounds, { 
+      map.fitBounds(bounds, {
         padding: [20, 20],
         maxZoom: 8,
         animate: true,
@@ -229,24 +229,24 @@ export default function SimpleMap() {
   // Handle simulation updates from ShipSimulation component
   const handleSimulationUpdate = (simulationData) => {
     console.log('SimpleMap received simulation update:', simulationData);
-    
+
     setIsSimulationRunning(simulationData.isRunning);
     setShipPosition(simulationData.position);
     setSimulationProgress(simulationData.progress);
     setCurrentWeatherAffectedSpeed(simulationData.weatherSpeed);
-    
+
     // Zoom to route when simulation starts
     if (simulationData.isRunning && selectedRouteForSimulation) {
       setTimeout(() => {
         zoomToRoute(selectedRouteForSimulation);
       }, 200);
     }
-    
+
     if (simulationData.weatherData) {
       console.log('Setting currentWaypointWeather:', simulationData.weatherData);
       setCurrentWaypointWeather(simulationData.weatherData);
     }
-    
+
     console.log('Updated states:', {
       isSimulationRunning: simulationData.isRunning,
       shipPosition: simulationData.position,
@@ -259,58 +259,58 @@ export default function SimpleMap() {
   // Calculate estimated travel time and fuel usage
   const calculateRouteMetrics = (route) => {
     if (!route) return null;
-    
+
     const totalDistance = calculateRouteDistance(route.coordinates);
     const baseSpeed = 20; // Base speed in knots (typical container ship)
-    
+
     // Get average weather conditions from waypoints
     let totalWindSpeed = 0;
     let totalWaveHeight = 0;
     let waypointCount = 0;
-    
+
     route.coordinates.forEach((coord, index) => {
       const waypointId = `${route.id}-waypoint-${index}`;
       const waypointInfo = waypointData[waypointId];
-      
+
       if (waypointInfo && waypointInfo.weather && waypointInfo.ocean) {
         totalWindSpeed += waypointInfo.weather.wind?.speed || 0;
         totalWaveHeight += parseFloat(waypointInfo.ocean.waveHeight) || 0;
         waypointCount++;
       }
     });
-    
+
     const avgWindSpeed = waypointCount > 0 ? totalWindSpeed / waypointCount : 10;
     const avgWaveHeight = waypointCount > 0 ? totalWaveHeight / waypointCount : 1.5;
-    
+
     // Calculate speed adjustments based on conditions
     let speedAdjustment = 1.0;
-    
+
     // Wind impact (headwind reduces speed, tailwind increases)
     if (avgWindSpeed > 15) speedAdjustment *= 0.9; // Strong winds
     else if (avgWindSpeed > 10) speedAdjustment *= 0.95; // Moderate winds
-    
+
     // Wave height impact
     if (avgWaveHeight > 3) speedAdjustment *= 0.8; // High waves
     else if (avgWaveHeight > 2) speedAdjustment *= 0.9; // Moderate waves
-    
+
     // Route type adjustments
     if (route.style === 'dashed') speedAdjustment *= 0.95; // Suez route (more congested)
-    
+
     const adjustedSpeed = baseSpeed * speedAdjustment;
     const travelTimeHours = totalDistance / (adjustedSpeed * 1.852); // Convert knots to km/h
     const travelTimeDays = travelTimeHours / 24;
-    
+
     // Fuel consumption calculation (typical container ship: 150-200 tons per day)
     const baseFuelPerDay = 175; // tons per day
     let fuelAdjustment = 1.0;
-    
+
     // Adjust fuel based on conditions
     if (avgWindSpeed > 15) fuelAdjustment *= 1.15; // High winds increase fuel usage
     if (avgWaveHeight > 3) fuelAdjustment *= 1.2; // High waves increase fuel usage
     if (route.style === 'dashed') fuelAdjustment *= 1.05; // Suez route (more maneuvering)
-    
+
     const totalFuel = baseFuelPerDay * travelTimeDays * fuelAdjustment;
-    
+
     return {
       totalDistance,
       baseSpeed,
@@ -328,18 +328,18 @@ export default function SimpleMap() {
   // Fetch weather data for a specific waypoint
   const fetchWaypointWeatherData = async (coord, waypointId) => {
     console.log(`Fetching weather data for ${waypointId}...`);
-    
+
     // Always fetch fresh data when waypoint is clicked
     setLoadingWaypoints(prev => ({ ...prev, [waypointId]: true }));
-    
+
     try {
       const data = await fetchWaypointWeather(coord, waypointId);
       console.log(`Weather data received for ${waypointId}:`, data);
       setWaypointData(prev => ({ ...prev, [waypointId]: data }));
     } catch (error) {
       console.error('Error fetching waypoint data:', error);
-      setWaypointData(prev => ({ 
-        ...prev, 
+      setWaypointData(prev => ({
+        ...prev,
         [waypointId]: { error: 'Failed to load data', timestamp: new Date().toISOString() }
       }));
     } finally {
@@ -389,20 +389,20 @@ export default function SimpleMap() {
           }
         `}
       </style>
-      
+
       {/* Main Container - Vertical Layout */}
-      <div style={{ 
-        width: '100%', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '20px', 
-        minHeight: '100vh', 
-        boxSizing: 'border-box', 
+      <div style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        minHeight: '100vh',
+        boxSizing: 'border-box',
         padding: '20px',
         maxWidth: '1400px',
         margin: '0 auto'
       }}>
-        
+
         {/* Route Controls Panel */}
         <div style={{
           background: '#fff',
@@ -413,7 +413,7 @@ export default function SimpleMap() {
           boxSizing: 'border-box'
         }}>
           <h3 style={{ margin: '0 0 15px 0', color: '#217A8A', fontSize: '1.3rem' }}>Maritime Trade Routes</h3>
-          
+
           {/* Route Toggles */}
           <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
             {routes.map(route => (
@@ -440,8 +440,8 @@ export default function SimpleMap() {
           {/* Route Information */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px' }}>
             {routes.map(route => (
-              <div 
-                key={route.id} 
+              <div
+                key={route.id}
                 onClick={() => handleRouteClick(route)}
                 style={{
                   background: selectedRoute?.id === route.id ? '#f0f8ff' : '#f8fafc',
@@ -474,11 +474,11 @@ export default function SimpleMap() {
                   <div><strong>Route Type:</strong> {route.style === 'solid' ? 'Direct Atlantic' : 'Suez Canal'}</div>
                 </div>
                 {selectedRoute?.id === route.id && (
-                  <div style={{ 
-                    marginTop: '15px', 
-                    padding: '15px', 
-                    background: '#fff', 
-                    borderRadius: '6px', 
+                  <div style={{
+                    marginTop: '15px',
+                    padding: '15px',
+                    background: '#fff',
+                    borderRadius: '6px',
                     border: `1px solid ${route.color}40`,
                     maxHeight: '300px',
                     overflowY: 'auto'
@@ -486,9 +486,9 @@ export default function SimpleMap() {
                     <h5 style={{ margin: '0 0 10px 0', color: route.color, fontSize: '1rem' }}>Route Waypoints</h5>
                     <div style={{ fontSize: '0.85rem', color: '#555' }}>
                       {route.coordinates.map((coord, index) => (
-                        <div key={index} style={{ 
-                          padding: '8px', 
-                          margin: '4px 0', 
+                        <div key={index} style={{
+                          padding: '8px',
+                          margin: '4px 0',
                           background: index === 0 || index === route.coordinates.length - 1 ? '#e8f5e8' : '#f5f5f5',
                           borderRadius: '4px',
                           borderLeft: `3px solid ${index === 0 ? '#28a745' : index === route.coordinates.length - 1 ? '#dc3545' : route.color}`
@@ -510,11 +510,11 @@ export default function SimpleMap() {
         </div>
 
         {/* Ship Movement Simulation Section */}
-        <div style={{ 
-          width: '100%', 
-          background: '#fff', 
-          borderRadius: '12px', 
-          padding: '20px', 
+        <div style={{
+          width: '100%',
+          background: '#fff',
+          borderRadius: '12px',
+          padding: '20px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           boxSizing: 'border-box'
         }}>
@@ -527,8 +527,8 @@ export default function SimpleMap() {
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#34495e' }}>
               Select Route for Simulation:
             </label>
-            <select 
-              value={selectedRouteForSimulation?.id || ''} 
+            <select
+              value={selectedRouteForSimulation?.id || ''}
               onChange={(e) => {
                 const route = routes.find(r => r.id === parseInt(e.target.value));
                 setSelectedRouteForSimulation(route);
@@ -561,15 +561,15 @@ export default function SimpleMap() {
         </div>
 
         {/* Map and Weather Speed Display Container */}
-        <div style={{ 
-          display: 'flex', 
-          gap: '20px', 
+        <div style={{
+          display: 'flex',
+          gap: '20px',
           width: '100%'
         }}>
           {/* Map Container */}
-          <div style={{ 
+          <div style={{
             flex: '1',
-            height: '400px', 
+            height: '400px',
             borderRadius: '12px',
             overflow: 'hidden',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
@@ -587,23 +587,23 @@ export default function SimpleMap() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              
-              {routes.map(route => 
+
+              {routes.map(route =>
                 visibleRoutes[route.id] ? (
                   <React.Fragment key={route.id}>
                     {/* Route Line */}
                     <Polyline
                       positions={route.coordinates}
-                      pathOptions={{ 
-                        color: route.color, 
+                      pathOptions={{
+                        color: route.color,
                         weight: 4,
                         opacity: 0.8,
                         dashArray: route.style === 'dashed' ? '10, 10' : undefined
                       }}
                     >
                       <Tooltip sticky>
-                        <strong>{route.name}</strong><br/>
-                        {route.coordinates.length} waypoints<br/>
+                        <strong>{route.name}</strong><br />
+                        {route.coordinates.length} waypoints<br />
                         {calculateRouteDistance(route.coordinates).toFixed(0)} km
                       </Tooltip>
                       <Popup>
@@ -615,7 +615,7 @@ export default function SimpleMap() {
                         </div>
                       </Popup>
                     </Polyline>
-                    
+
                     {/* Port Markers */}
                     {route.ports.map((port, index) => (
                       <Marker
@@ -698,7 +698,7 @@ export default function SimpleMap() {
                       const waypointId = `${route.id}-waypoint-${index}`;
                       const waypointInfo = waypointData[waypointId];
                       const isLoading = loadingWaypoints[waypointId];
-                      
+
                       return (
                         <Marker
                           key={waypointId}
@@ -745,7 +745,7 @@ export default function SimpleMap() {
                               <h4 style={{ margin: '0 0 12px 0', color: route.color, fontSize: '1.1rem', textAlign: 'center' }}>
                                 {index === 0 ? '🚢 Start Point' : index === route.coordinates.length - 1 ? '🏁 End Point' : `Waypoint ${index + 1}`}
                               </h4>
-                              
+
                               {/* Basic Info */}
                               <div style={{ marginBottom: '15px', padding: '10px', background: '#f8f9fa', borderRadius: '6px' }}>
                                 <p style={{ margin: '4px 0', fontSize: '12px', fontWeight: 'bold' }}>
@@ -769,17 +769,17 @@ export default function SimpleMap() {
                                 <div style={{ textAlign: 'center', padding: '20px' }}>
                                   <div style={{ fontSize: '16px', color: '#666', marginBottom: '10px' }}>🌤️ Fetching real-time weather data...</div>
                                   <div style={{ fontSize: '12px', color: '#999' }}>Please wait while we get current conditions</div>
-                                  <div style={{ 
-                                    width: '100%', 
-                                    height: '4px', 
-                                    background: '#e9ecef', 
-                                    borderRadius: '2px', 
+                                  <div style={{
+                                    width: '100%',
+                                    height: '4px',
+                                    background: '#e9ecef',
+                                    borderRadius: '2px',
                                     marginTop: '10px',
                                     overflow: 'hidden'
                                   }}>
-                                    <div style={{ 
-                                      width: '60%', 
-                                      height: '100%', 
+                                    <div style={{
+                                      width: '60%',
+                                      height: '100%',
                                       background: 'linear-gradient(90deg, #007bff, #0056b3)',
                                       borderRadius: '2px',
                                       animation: 'loading 1.5s ease-in-out infinite'
@@ -833,7 +833,7 @@ export default function SimpleMap() {
                                             <p style={{ margin: '4px 0' }}><strong>Visibility:</strong> {waypointInfo.ocean.visibility} km</p>
                                           </div>
                                         </div>
-                                        
+
                                         {/* Direction Indicators */}
                                         <div style={{ marginTop: '8px', padding: '8px', background: '#fff', borderRadius: '4px' }}>
                                           <p style={{ margin: '4px 0', fontWeight: 'bold' }}>🧭 Direction Indicators</p>
@@ -859,7 +859,7 @@ export default function SimpleMap() {
                                       const weatherSpeed = calculateWeatherAffectedSpeed(baseSpeed, waypointInfo, 0);
                                       const fuelConsumption = calculateFuelConsumption(weatherSpeed.sog, index, route.coordinates.length, waypointInfo);
                                       const routeCost = calculateRouteCost(fuelConsumption, index, route.coordinates.length, waypointInfo, route.style);
-                                      
+
                                       return (
                                         <div style={{ fontSize: '12px' }}>
                                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
@@ -872,7 +872,7 @@ export default function SimpleMap() {
                                               <p style={{ margin: '4px 0' }}><strong>Speed Factor:</strong> {(weatherSpeed.sog / baseSpeed * 100).toFixed(0)}%</p>
                                             </div>
                                           </div>
-                                          
+
                                           {/* Cost Breakdown */}
                                           <div style={{ marginTop: '8px', padding: '8px', background: '#fff', borderRadius: '4px' }}>
                                             <p style={{ margin: '4px 0', fontWeight: 'bold' }}>💵 Cost Breakdown (from this waypoint)</p>
@@ -928,15 +928,15 @@ export default function SimpleMap() {
                               {waypointInfo?.error && (
                                 <div style={{ textAlign: 'center', padding: '20px', color: '#d32f2f' }}>
                                   <div style={{ fontSize: '14px' }}>❌ {waypointInfo.error}</div>
-                                  <button 
+                                  <button
                                     onClick={() => fetchWaypointWeatherData(coord, waypointId)}
-                                    style={{ 
-                                      marginTop: '8px', 
-                                      padding: '4px 8px', 
-                                      background: '#1976d2', 
-                                      color: 'white', 
-                                      border: 'none', 
-                                      borderRadius: '4px', 
+                                    style={{
+                                      marginTop: '8px',
+                                      padding: '4px 8px',
+                                      background: '#1976d2',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
                                       cursor: 'pointer',
                                       fontSize: '11px'
                                     }}
@@ -949,14 +949,14 @@ export default function SimpleMap() {
                               {!waypointInfo && !isLoading && (
                                 <div style={{ textAlign: 'center', padding: '20px' }}>
                                   <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Click to load real-time weather data</div>
-                                  <button 
+                                  <button
                                     onClick={() => fetchWaypointWeatherData(coord, waypointId)}
-                                    style={{ 
-                                      padding: '6px 12px', 
-                                      background: route.color, 
-                                      color: 'white', 
-                                      border: 'none', 
-                                      borderRadius: '4px', 
+                                    style={{
+                                      padding: '6px 12px',
+                                      background: route.color,
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
                                       cursor: 'pointer',
                                       fontSize: '12px'
                                     }}
@@ -968,14 +968,14 @@ export default function SimpleMap() {
 
                               {waypointInfo && !isLoading && !waypointInfo.error && (
                                 <div style={{ textAlign: 'center', marginTop: '10px' }}>
-                                  <button 
+                                  <button
                                     onClick={() => fetchWaypointWeatherData(coord, waypointId)}
-                                    style={{ 
-                                      padding: '4px 8px', 
-                                      background: '#28a745', 
-                                      color: 'white', 
-                                      border: 'none', 
-                                      borderRadius: '4px', 
+                                    style={{
+                                      padding: '4px 8px',
+                                      background: '#28a745',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '4px',
                                       cursor: 'pointer',
                                       fontSize: '11px'
                                     }}
@@ -1015,11 +1015,11 @@ export default function SimpleMap() {
         </div>
 
         {/* Route Analytics Section */}
-        <div style={{ 
-          width: '100%', 
-          background: '#fff', 
-          borderRadius: '12px', 
-          padding: '20px', 
+        <div style={{
+          width: '100%',
+          background: '#fff',
+          borderRadius: '12px',
+          padding: '20px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           boxSizing: 'border-box'
         }}>
@@ -1032,8 +1032,8 @@ export default function SimpleMap() {
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#34495e' }}>
               Select Route for Analysis:
             </label>
-            <select 
-              value={selectedRouteForCalculation?.id || ''} 
+            <select
+              value={selectedRouteForCalculation?.id || ''}
               onChange={(e) => {
                 const route = routes.find(r => r.id === parseInt(e.target.value));
                 setSelectedRouteForCalculation(route);
@@ -1059,9 +1059,9 @@ export default function SimpleMap() {
           {/* Route Metrics Display */}
           {selectedRouteForCalculation && (
             <div>
-              <div style={{ 
-                padding: '15px', 
-                background: `linear-gradient(135deg, ${selectedRouteForCalculation.color}15, ${selectedRouteForCalculation.color}05)`, 
+              <div style={{
+                padding: '15px',
+                background: `linear-gradient(135deg, ${selectedRouteForCalculation.color}15, ${selectedRouteForCalculation.color}05)`,
                 borderRadius: '8px',
                 border: `2px solid ${selectedRouteForCalculation.color}30`,
                 marginBottom: '20px'
@@ -1069,11 +1069,11 @@ export default function SimpleMap() {
                 <h4 style={{ margin: '0 0 15px 0', color: selectedRouteForCalculation.color, fontSize: '1.1rem', textAlign: 'center' }}>
                   {selectedRouteForCalculation.name}
                 </h4>
-                
+
                 {(() => {
                   const metrics = calculateRouteMetrics(selectedRouteForCalculation);
                   if (!metrics) return <div>Loading metrics...</div>;
-                  
+
                   return (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
                       {/* Distance and Speed */}
@@ -1094,7 +1094,7 @@ export default function SimpleMap() {
                           <div><strong>Hours:</strong> {metrics.travelTimeHours.toFixed(1)} hrs</div>
                           <div><strong>Days:</strong> {metrics.travelTimeDays.toFixed(1)} days</div>
                           <div style={{ marginTop: '8px', padding: '8px', background: '#e8f5e8', borderRadius: '4px', fontSize: '12px' }}>
-                            <strong>Estimated Arrival:</strong><br/>
+                            <strong>Estimated Arrival:</strong><br />
                             {new Date(Date.now() + metrics.travelTimeHours * 60 * 60 * 1000).toLocaleDateString()}
                           </div>
                         </div>
@@ -1108,7 +1108,7 @@ export default function SimpleMap() {
                           <div><strong>Fuel Factor:</strong> {(metrics.fuelAdjustment * 100).toFixed(0)}%</div>
                           <div><strong>Total Fuel:</strong> {metrics.totalFuel.toFixed(1)} tons</div>
                           <div style={{ marginTop: '8px', padding: '8px', background: '#ffe6e6', borderRadius: '4px', fontSize: '12px' }}>
-                            <strong>Cost Estimate:</strong><br/>
+                            <strong>Cost Estimate:</strong><br />
                             ${(metrics.totalFuel * 650).toFixed(0)} (at $650/ton)
                           </div>
                         </div>
@@ -1121,8 +1121,8 @@ export default function SimpleMap() {
                           <div><strong>Avg Wind Speed:</strong> {metrics.avgWindSpeed.toFixed(1)} m/s</div>
                           <div><strong>Avg Wave Height:</strong> {metrics.avgWaveHeight.toFixed(1)}m</div>
                           <div style={{ marginTop: '8px', padding: '8px', background: '#fff3e0', borderRadius: '4px', fontSize: '12px' }}>
-                            <strong>Conditions:</strong><br/>
-                            {metrics.avgWindSpeed > 15 ? '⚠️ High winds' : metrics.avgWindSpeed > 10 ? '⚠️ Moderate winds' : '✅ Favorable winds'}<br/>
+                            <strong>Conditions:</strong><br />
+                            {metrics.avgWindSpeed > 15 ? '⚠️ High winds' : metrics.avgWindSpeed > 10 ? '⚠️ Moderate winds' : '✅ Favorable winds'}<br />
                             {metrics.avgWaveHeight > 3 ? '⚠️ High waves' : metrics.avgWaveHeight > 2 ? '⚠️ Moderate waves' : '✅ Calm seas'}
                           </div>
                         </div>
@@ -1139,9 +1139,9 @@ export default function SimpleMap() {
                   {(() => {
                     const metrics = calculateRouteMetrics(selectedRouteForCalculation);
                     if (!metrics) return <div>Loading recommendations...</div>;
-                    
+
                     const recommendations = [];
-                    
+
                     if (metrics.avgWindSpeed > 15) {
                       recommendations.push('• Consider route adjustment for high winds');
                     }
@@ -1154,11 +1154,11 @@ export default function SimpleMap() {
                     if (metrics.speedAdjustment < 0.9) {
                       recommendations.push('• Speed reduced due to conditions - adjust schedule');
                     }
-                    
+
                     if (recommendations.length === 0) {
                       recommendations.push('• Conditions favorable for optimal performance');
                     }
-                    
+
                     return recommendations.map((rec, index) => (
                       <div key={index} style={{ marginBottom: '4px' }}>{rec}</div>
                     ));
@@ -1174,10 +1174,10 @@ export default function SimpleMap() {
               <div style={{ fontSize: '48px', marginBottom: '15px' }}>📊</div>
               <div>Select a route above to view detailed analytics including:</div>
               <div style={{ marginTop: '10px', fontSize: '12px', color: '#868e96' }}>
-                • Estimated travel time<br/>
-                • Fuel consumption<br/>
-                • Weather impact analysis<br/>
-                • Cost estimates<br/>
+                • Estimated travel time<br />
+                • Fuel consumption<br />
+                • Weather impact analysis<br />
+                • Cost estimates<br />
                 • Route recommendations
               </div>
             </div>
@@ -1185,11 +1185,11 @@ export default function SimpleMap() {
         </div>
 
         {/* Route Cost Analysis Section */}
-        <div style={{ 
-          width: '100%', 
-          background: '#fff', 
-          borderRadius: '12px', 
-          padding: '20px', 
+        <div style={{
+          width: '100%',
+          background: '#fff',
+          borderRadius: '12px',
+          padding: '20px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           boxSizing: 'border-box'
         }}>
@@ -1202,8 +1202,8 @@ export default function SimpleMap() {
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#34495e' }}>
               Select Route for Cost Analysis:
             </label>
-            <select 
-              value={selectedRouteForAnalysis?.id || ''} 
+            <select
+              value={selectedRouteForAnalysis?.id || ''}
               onChange={(e) => {
                 const route = routes.find(r => r.id === parseInt(e.target.value));
                 setSelectedRouteForAnalysis(route);
@@ -1226,10 +1226,10 @@ export default function SimpleMap() {
                 </option>
               ))}
             </select>
-            
+
             {selectedRouteForAnalysis && (
-              <select 
-                value={analysisWaypointIndex} 
+              <select
+                value={analysisWaypointIndex}
                 onChange={(e) => setAnalysisWaypointIndex(parseInt(e.target.value))}
                 style={{
                   width: '150px',

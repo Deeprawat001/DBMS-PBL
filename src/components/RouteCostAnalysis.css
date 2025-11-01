@@ -1,0 +1,198 @@
+/* --- Global Container Styles --- */
+.route-cost-analysis-container {
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.analysis-title {
+  margin: 0 0 20px 0;
+  color: #f57c00;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+/* --- Placeholder Styles (when no route is selected) --- */
+.route-cost-analysis-placeholder {
+  text-align: center;
+  color: #3bc01dff;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.placeholder-emoji {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.placeholder-list {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #868e96;
+}
+
+/* --- Waypoint Status Section --- */
+.waypoint-status-container {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  /* background and border color are dynamically set inline in the JSX */
+}
+
+.waypoint-title {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  text-align: center;
+  /* color is dynamically set inline in the JSX */
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+/* --- Analysis Cards (Speed, Fuel, Cost, Weather) --- */
+.analysis-card {
+  padding: 12px;
+  background: #fff;
+  border-radius: 6px;
+}
+
+.analysis-card-title {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.analysis-card-title--speed {
+  color: #1976d2;
+}
+.analysis-card-title--fuel {
+  color: #dc3545;
+}
+.analysis-card-title--cost {
+  color: #28a745;
+}
+.analysis-card-title--weather {
+  color: #ff9800;
+}
+
+.analysis-card-content {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.no-weather-data {
+  color: #666;
+  font-style: italic;
+}
+
+/* --- Detailed Cost Breakdown Section --- */
+.detailed-breakdown-container {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.detailed-breakdown-title {
+  margin: 0 0 15px 0;
+  color: #6c757d;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* --- Breakdown Cards --- */
+.breakdown-card {
+  padding: 12px;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.breakdown-card--summary {
+  background: #e8f5e8;
+  border: 1px solid #4caf50;
+}
+
+.breakdown-card-title {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+}
+
+.breakdown-card-title--fuel {
+  color: #dc3545;
+}
+.breakdown-card-title--operational {
+  color: #28a745;
+}
+.breakdown-card-title--fees {
+  color: #6f42c1;
+}
+.breakdown-card-title--summary {
+  color: #2e7d32;
+}
+
+.breakdown-card-content {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.breakdown-item--total {
+  font-weight: bold;
+}
+
+.breakdown-item--weather-impact {
+  color: #d32f2f;
+}
+
+.breakdown-separator {
+  margin: 6px 0;
+  border: none;
+  border-top: 1px solid #e9ecef;
+}
+
+.summary-separator {
+  margin: 6px 0;
+  border: none;
+  border-top: 1px solid #4caf50;
+}
+
+.breakdown-item--final-total {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* --- Recommendations Section --- */
+.recommendations-container {
+  padding: 15px;
+  background: #fff3e0;
+  border-radius: 8px;
+  border: 1px solid #ff9800;
+}
+
+.recommendations-title {
+  margin: 0 0 10px 0;
+  color: #f57c00;
+  font-size: 14px;
+}
+
+.recommendations-content {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #e65100;
+}
+
+.recommendation-item {
+  margin-bottom: 4px;
+}

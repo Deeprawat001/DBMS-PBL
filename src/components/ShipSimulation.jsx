@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { calculateWeatherAffectedSpeed, calculateTravelTime } from '../utils/maritimeCalculations';
 import { fetchWaypointWeather } from '../services/weatherService';
