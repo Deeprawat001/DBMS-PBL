@@ -201,7 +201,7 @@ const RouteCostAnalysis = ({
   return (
     <div className="route-cost-analysis-container">
       <h3 className="analysis-title">
-        💰 Route Cost & Fuel Analysis
+        {/* 💰 Route Cost & Fuel Analysis */}
       </h3>
 
       {/* Current Waypoint Status */}

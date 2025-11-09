@@ -4,7 +4,6 @@ import "./App.css";
 import { routes as maritimeRoutes } from './data/routes'; 
 import WaypointWeatherDisplay from "./components/WaypointWeatherForecast"; 
 
-
 function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,11 +67,7 @@ function App() {
       <div className="Down">
           {/* 2. PASS THE ROUTES PROP: Pass the imported route data to the component. */}
           <WaypointWeatherDisplay routes={maritimeRoutes} />
-      </div>
-
-      <div className="footer">
-        &copy; 2025 Maritime Shipping Routes. Interactive visualization of global shipping routes.
-      </div>
+      </div>  
     </div>
   );
 }

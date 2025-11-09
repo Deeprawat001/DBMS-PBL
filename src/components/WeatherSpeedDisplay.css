@@ -11,6 +11,7 @@
   background: linear-gradient(145deg, #ffffff, #f8f9fa);
   overflow: scroll;
   height: 400px; 
+scrollbar-width: none;
   background-color: rgb(255, 255, 255);
 }
 

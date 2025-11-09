@@ -10,6 +10,7 @@ import { calculateWeatherAffectedSpeed } from './utils/maritimeCalculations';
 import WeatherSpeedDisplay from './components/WeatherSpeedDisplay';
 import ShipSimulation from './components/ShipSimulation';
 import RouteCostAnalysis from './components/RouteCostAnalysis';
+// import AlertSystem from "./components/AlertSystem"
 // import WaypointWeatherForecast from './components/WaypointWeatherForecast';
 
 // Import calculation functions from ShipSimulation (we'll need to extract them)
