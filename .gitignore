@@ -1,2 +1,28 @@
+# Node
 node_modules/
+npm-debug.log
+dist/
+build/
+
+# Environment
 .env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+
+# ML Models / Data
+*.joblib
+*.pkl
+*.h5
+*.csv
+
+# IDE / System
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

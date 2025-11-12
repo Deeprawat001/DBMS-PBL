@@ -4,7 +4,24 @@ const OPENWEATHER_API_KEY = import.meta.env.VITE_weather_api;
 const OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 // --- Utility Functions (Must be defined for core logic) ---
+export async function fetchWaypointForecast({ waypointId, lat, lon, history }) {
+  const res = await fetch('/api/waypoint/forecast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      waypoint_id: waypointId ?? 0,
+      lat,
+      lon,
+      history: history ?? {}
+    })
+  });
 
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error('Forecast fetch failed: ' + txt);
+  }
+  return res.json(); // expected: { waypoint_id, lat, lon, forecast: [ {day_index, temperature_c}, ... ] }
+}
 const calculateShipSpeedFromWeather = (windSpeed, waveHeight, visibility) => {
     const maxShipSpeed = 25; 
     let speedReduction = 0;

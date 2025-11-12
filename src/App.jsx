@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import SimpleMap from "./SimpleMap";
+import RouteAnalytics from "./components/RouteAnalytics";
 import "./App.css";
-import { routes as maritimeRoutes } from './data/routes'; 
-import WaypointWeatherDisplay from "./components/WaypointWeatherForecast"; 
-
+import { routes as maritimeRoutes } from './data/routes';
+import WaypointWeatherDisplay from "./components/WaypointWeatherForecast";
 function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,9 +16,9 @@ function App() {
 
   if (error) {
     return (
-      <div style={{ 
-        padding: '20px', 
-        textAlign: 'center', 
+      <div style={{
+        padding: '20px',
+        textAlign: 'center',
         color: 'red',
         background: '#fff',
         minHeight: '100vh',
@@ -36,8 +36,8 @@ function App() {
 
   if (isLoading) {
     return (
-      <div style={{ 
-        padding: '20px', 
+      <div style={{
+        padding: '20px',
         textAlign: 'center',
         background: '#fff',
         minHeight: '100vh',
@@ -60,14 +60,18 @@ function App() {
           Historic maritime trade routes connecting Alexandria to major global ports across all continents
         </p>
       </div>
+
       <div className="main-content">
         <SimpleMap />
       </div>
-
+      <div>
+        <RouteAnalytics waypointData={maritimeRoutes} />
+      </div>
       <div className="Down">
-          {/* 2. PASS THE ROUTES PROP: Pass the imported route data to the component. */}
-          <WaypointWeatherDisplay routes={maritimeRoutes} />
-      </div>  
+        {/* 2. PASS THE ROUTES PROP: Pass the imported route data to the component. */}
+        <WaypointWeatherDisplay routes={maritimeRoutes} />
+      </div>
+
     </div>
   );
 }

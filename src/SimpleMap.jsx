@@ -1015,175 +1015,14 @@ export default function SimpleMap() {
           />
         </div>
 
-        {/* Route Analytics Section */}
-        <div style={{
-          width: '100%',
-          background: '#fff',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          boxSizing: 'border-box'
-        }}>
-          <h3 style={{ margin: '0 0 20px 0', color: '#217A8A', fontSize: '1.3rem', textAlign: 'center' }}>
-            🚢 Route Analytics
-          </h3>
 
-          {/* Route Selection */}
-          <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#34495e' }}>
-              Select Route for Analysis:
-            </label>
-            <select
-              value={selectedRouteForCalculation?.id || ''}
-              onChange={(e) => {
-                const route = routes.find(r => r.id === parseInt(e.target.value));
-                setSelectedRouteForCalculation(route);
-              }}
-              style={{
-                width: '300px',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                fontSize: '14px',
-                backgroundColor: '#f8f9fa'
-              }}
-            >
-              <option value="">Choose a route...</option>
-              {routes.map(route => (
-                <option key={route.id} value={route.id}>
-                  {route.name}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          {/* Route Metrics Display */}
-          {selectedRouteForCalculation && (
-            <div>
-              <div style={{
-                padding: '15px',
-                background: `linear-gradient(135deg, ${selectedRouteForCalculation.color}15, ${selectedRouteForCalculation.color}05)`,
-                borderRadius: '8px',
-                border: `2px solid ${selectedRouteForCalculation.color}30`,
-                marginBottom: '20px'
-              }}>
-                <h4 style={{ margin: '0 0 15px 0', color: selectedRouteForCalculation.color, fontSize: '1.1rem', textAlign: 'center' }}>
-                  {selectedRouteForCalculation.name}
-                </h4>
 
-                {(() => {
-                  const metrics = calculateRouteMetrics(selectedRouteForCalculation);
-                  if (!metrics) return <div>Loading metrics...</div>;
 
-                  return (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-                      {/* Distance and Speed */}
-                      <div style={{ padding: '12px', background: '#fff', borderRadius: '6px' }}>
-                        <h5 style={{ margin: '0 0 10px 0', color: '#217A8A', fontSize: '14px' }}>📏 Distance & Speed</h5>
-                        <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
-                          <div><strong>Total Distance:</strong> {metrics.totalDistance.toFixed(0)} km</div>
-                          <div><strong>Base Speed:</strong> {metrics.baseSpeed} knots</div>
-                          <div><strong>Adjusted Speed:</strong> {metrics.adjustedSpeed.toFixed(1)} knots</div>
-                          <div><strong>Speed Factor:</strong> {(metrics.speedAdjustment * 100).toFixed(0)}%</div>
-                        </div>
-                      </div>
 
-                      {/* Travel Time */}
-                      <div style={{ padding: '12px', background: '#fff', borderRadius: '6px' }}>
-                        <h5 style={{ margin: '0 0 10px 0', color: '#28a745', fontSize: '14px' }}>⏱️ Estimated Travel Time</h5>
-                        <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
-                          <div><strong>Hours:</strong> {metrics.travelTimeHours.toFixed(1)} hrs</div>
-                          <div><strong>Days:</strong> {metrics.travelTimeDays.toFixed(1)} days</div>
-                          <div style={{ marginTop: '8px', padding: '8px', background: '#e8f5e8', borderRadius: '4px', fontSize: '12px' }}>
-                            <strong>Estimated Arrival:</strong><br />
-                            {new Date(Date.now() + metrics.travelTimeHours * 60 * 60 * 1000).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Fuel Consumption */}
-                      <div style={{ padding: '12px', background: '#fff', borderRadius: '6px' }}>
-                        <h5 style={{ margin: '0 0 10px 0', color: '#dc3545', fontSize: '14px' }}>⛽ Fuel Consumption</h5>
-                        <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
-                          <div><strong>Base Consumption:</strong> {metrics.baseFuelPerDay} tons/day</div>
-                          <div><strong>Fuel Factor:</strong> {(metrics.fuelAdjustment * 100).toFixed(0)}%</div>
-                          <div><strong>Total Fuel:</strong> {metrics.totalFuel.toFixed(1)} tons</div>
-                          <div style={{ marginTop: '8px', padding: '8px', background: '#ffe6e6', borderRadius: '4px', fontSize: '12px' }}>
-                            <strong>Cost Estimate:</strong><br />
-                            ${(metrics.totalFuel * 650).toFixed(0)} (at $650/ton)
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Weather Impact */}
-                      <div style={{ padding: '12px', background: '#fff', borderRadius: '6px' }}>
-                        <h5 style={{ margin: '0 0 10px 0', color: '#ff9800', fontSize: '14px' }}>🌤️ Weather Impact</h5>
-                        <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
-                          <div><strong>Avg Wind Speed:</strong> {metrics.avgWindSpeed.toFixed(1)} m/s</div>
-                          <div><strong>Avg Wave Height:</strong> {metrics.avgWaveHeight.toFixed(1)}m</div>
-                          <div style={{ marginTop: '8px', padding: '8px', background: '#fff3e0', borderRadius: '4px', fontSize: '12px' }}>
-                            <strong>Conditions:</strong><br />
-                            {metrics.avgWindSpeed > 15 ? '⚠️ High winds' : metrics.avgWindSpeed > 10 ? '⚠️ Moderate winds' : '✅ Favorable winds'}<br />
-                            {metrics.avgWaveHeight > 3 ? '⚠️ High waves' : metrics.avgWaveHeight > 2 ? '⚠️ Moderate waves' : '✅ Calm seas'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
 
-              {/* Recommendations */}
-              <div style={{ padding: '15px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e9ecef' }}>
-                <h5 style={{ margin: '0 0 10px 0', color: '#6c757d', fontSize: '14px' }}>💡 Recommendations</h5>
-                <div style={{ fontSize: '12px', lineHeight: '1.5', color: '#495057' }}>
-                  {(() => {
-                    const metrics = calculateRouteMetrics(selectedRouteForCalculation);
-                    if (!metrics) return <div>Loading recommendations...</div>;
-
-                    const recommendations = [];
-
-                    if (metrics.avgWindSpeed > 15) {
-                      recommendations.push('• Consider route adjustment for high winds');
-                    }
-                    if (metrics.avgWaveHeight > 3) {
-                      recommendations.push('• Monitor wave conditions closely');
-                    }
-                    if (metrics.fuelAdjustment > 1.1) {
-                      recommendations.push('• Fuel consumption above normal - plan accordingly');
-                    }
-                    if (metrics.speedAdjustment < 0.9) {
-                      recommendations.push('• Speed reduced due to conditions - adjust schedule');
-                    }
-
-                    if (recommendations.length === 0) {
-                      recommendations.push('• Conditions favorable for optimal performance');
-                    }
-
-                    return recommendations.map((rec, index) => (
-                      <div key={index} style={{ marginBottom: '4px' }}>{rec}</div>
-                    ));
-                  })()}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Instructions */}
-          {!selectedRouteForCalculation && (
-            <div style={{ textAlign: 'center', color: '#6c757d', fontSize: '14px', lineHeight: '1.6' }}>
-              <div style={{ fontSize: '48px', marginBottom: '15px' }}>📊</div>
-              <div>Select a route above to view detailed analytics including:</div>
-              <div style={{ marginTop: '10px', fontSize: '12px', color: '#868e96' }}>
-                • Estimated travel time<br />
-                • Fuel consumption<br />
-                • Weather impact analysis<br />
-                • Cost estimates<br />
-                • Route recommendations
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Route Cost Analysis Section */}
         <div style={{
@@ -1194,9 +1033,9 @@ export default function SimpleMap() {
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           boxSizing: 'border-box'
         }}>
-          <h3 style={{ margin: '0 0 20px 0', color: '#f57c00', fontSize: '1.3rem', textAlign: 'center' }}>
-            💰 Route Cost & Fuel Analysis
-          </h3>
+          <h1 style={{ margin: '0 0 20px 0', color: '#000000ff', fontSize: '1.3rem', textAlign: 'center' }}>
+            Route Cost & Fuel Analysis
+          </h1>
 
           {/* Route Selection for Analysis */}
           <div style={{ marginBottom: '20px', textAlign: 'center' }}>
@@ -1258,7 +1097,14 @@ export default function SimpleMap() {
           />
         </div>
 
+
+
       </div>
     </>
   );
 }
+
+
+
+
+

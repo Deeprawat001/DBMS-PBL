@@ -1,0 +1,167 @@
+.ra-container {
+  width: min(1350px, calc(100% - 40px)); /* 20px + 20px gutters at all sizes */
+  margin: 0 auto 20px;                   /* centered, 20px bottom margin */
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+
+
+.ra-title {
+    margin: 0 0 20px 0;
+    /* same title spacing */
+    color: #000000;
+    font-size: 1.3rem;
+    text-align: center;
+}
+
+/* --- Placeholder Styles (when no route is selected) --- */
+.ra-empty {
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 20px;
+    /* matches placeholder padding */
+    color: #6c757d;
+    /* keep analytics placeholder neutral */
+}
+
+.ra-empty-emoji {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.ra-empty-bullets {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #868e96;
+}
+
+/* --- Route Selection --- */
+.ra-select-wrap {
+    margin-bottom: 20px;
+    /* block spacing parity */
+    text-align: center;
+}
+
+.ra-select-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #34495e;
+}
+
+.ra-select {
+    width: 300px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    background-color: #f8f9fa;
+}
+
+/* --- Metrics Frame (dynamic bg/border set inline in JSX) --- */
+.ra-metrics-frame {
+    padding: 15px;
+    /* inner section padding = 15px */
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.ra-metrics-title {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+/* --- Grid & Cards (mirrors .grid-container & .analysis-card) --- */
+.ra-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* same min width */
+    gap: 15px;
+    /* identical grid gap */
+}
+
+.ra-card {
+    padding: 12px;
+    /* card padding = 12px */
+    background: #fff;
+    border-radius: 6px;
+    /* optional: add border to match breakdown cards; left off to match your analytics cards */
+    /* border: 1px solid #e9ecef; */
+}
+
+.ra-card-title {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.ra-card-body {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Accent colors (parallel to your analysis-card-title modifiers) */
+.ra-blue {
+    color: #217A8A;
+}
+
+.ra-green {
+    color: #28a745;
+}
+
+.ra-red {
+    color: #dc3545;
+}
+
+.ra-orange {
+    color: #ff9800;
+}
+
+/* --- Pills (same dimensions & feel as your info blocks) --- */
+.ra-pill {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.ra-pill-green {
+    background: #e8f5e8;
+}
+
+.ra-pill-red {
+    background: #ffe6e6;
+}
+
+.ra-pill-orange {
+    background: #fff3e0;
+}
+
+/* --- Recommendations (mirrors your neutral container) --- */
+.ra-reco {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.ra-reco-title {
+    margin: 0 0 10px 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.ra-reco-body {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #495057;
+}
+
+.ra-reco-item {
+    margin-bottom: 4px;
+}
